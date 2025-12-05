@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "assecor-assesment-api", "assecor-assesment-api.csproj", "{95C11AC8-D6C9-2631-76B3-01B43866D1CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+/* Removed solution entry for non-existent test project: tests\assecor-assesment-api.Tests\assecor-assesment-api.Tests.csproj */
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Debug|x64.Build.0 = Debug|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Debug|x86.Build.0 = Debug|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Release|x64.ActiveCfg = Release|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Release|x64.Build.0 = Release|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Release|x86.ActiveCfg = Release|Any CPU
+		{95C11AC8-D6C9-2631-76B3-01B43866D1CD}.Release|x86.Build.0 = Release|Any CPU
+	/* Removed ProjectConfigurationPlatforms entries for missing test project */
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+	/* Removed NestedProjects entry for missing test project */
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {36854C58-81FB-458A-A59A-BC7AE49CA140}
+	EndGlobalSection
+EndGlobal

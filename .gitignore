@@ -1,0 +1,62 @@
+# Build results
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+
+# NuGet
+*.nupkg
+*.nuspec
+packages/
+.nuget/
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# Test results
+TestResults/
+*.trx
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE temporary files
+*.bak
+*.tmp
+~*
+
+# Local development
+launchSettings.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# Runtime files
+*.runtimeconfig.json
+*.deps.json
+*.staticwebassets.*
+
+# Rider / ReSharper
+.idea/
+*.sln.iml
+
+# Node (if used for any frontend tools)
+node_modules/
+npm-debug.log
+
+# Python (if used for scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.local
