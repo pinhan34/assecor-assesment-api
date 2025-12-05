@@ -25,10 +25,12 @@ namespace assecor_assesment_api.Data
             using var reader = new StreamReader(stream);
 
             string? line;
+            int lineNumber = 0;
             while ((line = await reader.ReadLineAsync()) != null)
             {
+                lineNumber++;
                 cancellationToken.ThrowIfCancellationRequested();
-                var p = ParseLine(line);
+                var p = ParseLine(line, lineNumber);
                 if (p != null) list.Add(p);
             }
 
@@ -43,17 +45,19 @@ namespace assecor_assesment_api.Data
             using var reader = new StreamReader(stream);
 
             string? line;
+            int lineNumber = 0;
             while ((line = await reader.ReadLineAsync()) != null)
             {
+                lineNumber++;
                 cancellationToken.ThrowIfCancellationRequested();
-                var p = ParseLine(line);
+                var p = ParseLine(line, lineNumber);
                 if (p != null && p.Id == id) return p;
             }
 
             return null;
         }
 
-        private Person? ParseLine(string line)
+        private Person? ParseLine(string line, int lineNumber)
         {
             if (string.IsNullOrWhiteSpace(line)) return null;
 
@@ -67,64 +71,24 @@ namespace assecor_assesment_api.Data
                 return null;
             }
 
-            // Expecting at least lastname, firstname, address, id-ish (group/id). We'll be tolerant.
-            if (parts.Length < 4)
+            // Need at least lastname, firstname, address (3 columns minimum)
+            if (parts.Length < 3)
             {
-                // try to salvage lines with 3 columns where last column might be id
-                if (parts.Length == 3)
-                {
-                    // last column might contain both address and id; attempt to split by last space
-                    var last = parts[2];
-                    var idx = last.LastIndexOf(' ');
-                    if (idx > 0)
-                    {
-                        var addr = last.Substring(0, idx).Trim();
-                        var idPart = last.Substring(idx + 1).Trim();
-                        var id = TryParseInt(idPart);
-                        return new Person
-                        {
-                            LastName = parts[0],
-                            FirstName = parts[1],
-                            Address = addr,
-                            Id = id ?? 0,
-                            Group = null
-                        };
-                    }
-                }
                 return null;
             }
 
             var lastName = parts[0];
             var firstName = parts[1];
-            var address = parts[2];
-            var idOrGroup = parts[3];
-
-            var idVal = TryParseInt(idOrGroup) ?? 0;
-            int? group = null;
-            int? color = null;
-
-            // If there's a 4th column, it's the color (ID 1-7)
-            color = TryParseInt(parts[3]);
-            
-            // If there's a 5th column, treat the 4th as color and 5th as group
-            if (parts.Length >= 5)
-            {
-                color = TryParseInt(parts[3]);
-                group = TryParseInt(parts[4]);
-            }
-            else if (parts.Length == 4)
-            {
-                // 4 columns: lastname, firstname, address, color
-                idVal = 0; // No explicit ID provided
-            }
+            var address = parts.Length > 2 ? parts[2] : null;
+            int? color = parts.Length >= 4 ? TryParseInt(parts[3]) : null;
 
             return new Person
             {
-                Id = idVal,
+                Id = lineNumber,  // Use line number as ID
                 LastName = lastName,
                 FirstName = firstName,
                 Address = address,
-                Group = group,
+                Group = null,
                 Color = color
             };
         }
