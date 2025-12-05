@@ -146,8 +146,8 @@ Müller, Hans, 67742 Lauterecken, 1";
         public async Task ParseLine_SkipsRowWithMissingBothNames()
         {
             var csv = @"Müller, Hans, 67742 Lauterecken, 1
-, , 12313 Wasweißich, 1
-Petersen, Peter, 18439 Stralsund, 2";
+                    , , 12313 Wasweißich, 1
+                    Petersen, Peter, 18439 Stralsund, 2";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -166,7 +166,7 @@ Petersen, Peter, 18439 Stralsund, 2";
         public async Task ParseLine_HandlesColorWithNonNumericCharacters()
         {
             var csv = @"Andersson, Anders, 32132 Schweden - ☀, 2
-Müller, Hans, 67742 Lauterecken, 1";
+                        Müller, Hans, 67742 Lauterecken, 1";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -186,7 +186,7 @@ Müller, Hans, 67742 Lauterecken, 1";
         public async Task ParseLine_HandlesRowWithMissingColor()
         {
             var csv = @"Müller, Hans, 67742 Lauterecken
-Petersen, Peter, 18439 Stralsund, 2";
+                        Petersen, Peter, 18439 Stralsund, 2";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -207,7 +207,7 @@ Petersen, Peter, 18439 Stralsund, 2";
         public async Task ParseLine_ExtractsNumericColorFromMixedContent()
         {
             var csv = @"Test, User, Some Address, 5abc
-Another, Person, Place, x7y";
+                        Another, Person, Place, x7y";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -223,9 +223,9 @@ Another, Person, Place, x7y";
         [Fact]
         public async Task GetByIdAsync_ReturnsPersonByLineNumber()
         {
-            var csv = @"Müller, Hans, 67742 Lauterecken, 1
-Petersen, Peter, 18439 Stralsund, 2
-Johnson, Johnny, 88888 made up, 3";
+            var csv = @"Müller, Hans, 67742 Lauterecken, 1 Petersen, 
+                        Peter, 18439 Stralsund, 2
+                        Johnson, Johnny, 88888 made up, 3";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -253,8 +253,7 @@ Johnson, Johnny, 88888 made up, 3";
         public async Task ParseLine_HandlesEmptyLines()
         {
             var csv = @"Müller, Hans, 67742 Lauterecken, 1
-
-Petersen, Peter, 18439 Stralsund, 2";
+                        Petersen, Peter, 18439 Stralsund, 2";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);

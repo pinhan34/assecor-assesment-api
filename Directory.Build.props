@@ -1,0 +1,42 @@
+<Project>
+  <!-- Shared MSBuild properties for all projects in this solution -->
+  
+  <!-- Assembly and Version Information -->
+  <PropertyGroup>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+    <Company>Assecor</Company>
+    <Product>Assecor Assessment API</Product>
+    <Description>RESTful API for reading and querying person data from CSV files</Description>
+    <Authors>Development Team</Authors>
+    <RepositoryUrl>https://github.com/pinhan34/assecor-assesment-api</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <!-- Language and Build Settings -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- CI/CD Build Properties -->
+  <PropertyGroup>
+    <ContinuousIntegrationBuild Condition="'$(CI)' != '' or '$(GITHUB_ACTIONS)' != '' or '$(TF_BUILD)' != ''">true</ContinuousIntegrationBuild>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- Release Build Strictness -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <!-- Debug Build Properties -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+</Project>

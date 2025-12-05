@@ -1,0 +1,149 @@
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - '**'
+    exclude:
+      - 'README.md'
+      - '.gitignore'
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  buildPlatform: 'Any CPU'
+  dotnetVersion: '9.0.x'
+
+stages:
+  - stage: Build
+    displayName: 'Build and Test'
+    jobs:
+      - job: BuildAndTest
+        displayName: 'Build, Test, and Analyze'
+        
+        steps:
+          # Setup .NET SDK
+          - task: UseDotNet@2
+            displayName: 'Install .NET $(dotnetVersion)'
+            inputs:
+              version: $(dotnetVersion)
+              packageType: sdk
+
+          # Restore NuGet packages
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet packages'
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          # Build solution
+          - task: DotNetCoreCLI@2
+            displayName: 'Build $(buildConfiguration)'
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration) --no-restore'
+
+          # Run unit tests with coverage and TRX reports
+          - task: DotNetCoreCLI@2
+            displayName: 'Run Unit Tests'
+            inputs:
+              command: 'test'
+              projects: 'tests/UnitTests/UnitTests.csproj'
+              arguments: >-
+                --configuration $(buildConfiguration)
+                --no-build
+                --logger trx
+                --logger "console;verbosity=normal"
+                /p:CollectCoverage=true
+                /p:CoverletOutputFormat=cobertura
+                /p:CoverletOutput=$(Build.ArtifactStagingDirectory)/coverage/
+              publishTestResults: true
+
+          # Publish code coverage results
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish Code Coverage'
+            condition: always()
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(Build.ArtifactStagingDirectory)/coverage/coverage.cobertura.xml'
+              reportDirectory: '$(Build.ArtifactStagingDirectory)/coverage'
+              failIfCoverageEmpty: false
+
+          # Publish build artifacts
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Application'
+            inputs:
+              command: 'publish'
+              projects: 'assecor-assesment-api.csproj'
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish'
+              publishWebProjects: false
+              zipAfterPublish: true
+
+          # Copy configuration files to artifact
+          - task: CopyFiles@2
+            displayName: 'Copy Configuration Files'
+            inputs:
+              sourceFolder: '$(Build.SourcesDirectory)'
+              contents: |
+                appsettings.json
+                appsettings.Development.json
+                appsettings.Production.json
+              targetFolder: '$(Build.ArtifactStagingDirectory)/config'
+
+          # Publish artifact
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Build Artifacts'
+            condition: always()
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'assecor-assessment-api-$(Build.BuildId)'
+              publishLocation: 'Container'
+
+  - stage: Analyze
+    displayName: 'Code Quality Analysis'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: CodeQuality
+        displayName: 'Run Code Quality Checks'
+        
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Install .NET $(dotnetVersion)'
+            inputs:
+              version: $(dotnetVersion)
+              packageType: sdk
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore packages'
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          # Run StyleCop analyzers (if added to project)
+          - task: DotNetCoreCLI@2
+            displayName: 'Check Code Style'
+            condition: always()
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '--configuration $(buildConfiguration) --no-restore /p:EnforceCodeStyleInBuild=true'
+            continueOnError: true
+
+          # Security scanning (optional - requires additional setup)
+          - script: |
+              dotnet list package --vulnerable
+            displayName: 'Check for Vulnerable Packages'
+            continueOnError: true
+
