@@ -79,7 +79,9 @@ namespace assecor_assesment_api.Data
 
             var lastName = parts[0];
             var firstName = parts[1];
-            var address = parts.Length > 2 ? parts[2] : null;
+            
+            // Treat empty strings as null
+            string? address = parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[2]) ? parts[2] : null;
             int? color = parts.Length >= 4 ? TryParseInt(parts[3]) : null;
 
             return new Person
