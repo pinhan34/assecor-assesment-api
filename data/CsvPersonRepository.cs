@@ -60,6 +60,13 @@ namespace assecor_assesment_api.Data
             // Simple CSV split on comma, preserving content; trim whitespace
             var parts = line.Split(',').Select(x => x.Trim()).ToArray();
 
+            // Skip rows where both lastname and firstname are missing
+            if (string.IsNullOrWhiteSpace(parts.ElementAtOrDefault(0)) && 
+                string.IsNullOrWhiteSpace(parts.ElementAtOrDefault(1)))
+            {
+                return null;
+            }
+
             // Expecting at least lastname, firstname, address, id-ish (group/id). We'll be tolerant.
             if (parts.Length < 4)
             {
@@ -94,10 +101,21 @@ namespace assecor_assesment_api.Data
 
             var idVal = TryParseInt(idOrGroup) ?? 0;
             int? group = null;
-            // If there's a 5th column treat it as group
+            int? color = null;
+
+            // If there's a 4th column, it's the color (ID 1-7)
+            color = TryParseInt(parts[3]);
+            
+            // If there's a 5th column, treat the 4th as color and 5th as group
             if (parts.Length >= 5)
             {
+                color = TryParseInt(parts[3]);
                 group = TryParseInt(parts[4]);
+            }
+            else if (parts.Length == 4)
+            {
+                // 4 columns: lastname, firstname, address, color
+                idVal = 0; // No explicit ID provided
             }
 
             return new Person
@@ -106,7 +124,8 @@ namespace assecor_assesment_api.Data
                 LastName = lastName,
                 FirstName = firstName,
                 Address = address,
-                Group = group
+                Group = group,
+                Color = color
             };
         }
 

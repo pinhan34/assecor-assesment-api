@@ -12,4 +12,10 @@
     <Compile Remove="tests\**\*.cs" />
   </ItemGroup>
 
+  <!-- Also exclude test files from other default item groups (Content/None) so build won't try to copy test outputs -->
+  <ItemGroup>
+    <Content Remove="tests\**\*.*" />
+    <None Remove="tests\**\*.*" />
+  </ItemGroup>
+
 </Project>

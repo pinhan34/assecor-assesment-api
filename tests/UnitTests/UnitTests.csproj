@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
   <IsPackable>false</IsPackable>
-    <!-- Ensure referenced project's runtime/deps files are copied to the test output. -->
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
