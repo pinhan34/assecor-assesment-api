@@ -1,7 +1,7 @@
 namespace assecor_assesment_api.Exceptions
 {
     /// <summary>
-    /// Exception thrown when person data validation fails.
+    /// Exception thrown when data validation for new person insertion fails.
     /// </summary>
     public class InvalidPersonDataException : Exception
     {

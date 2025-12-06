@@ -55,7 +55,7 @@ namespace assecor_assesment_api.Controllers
 
             if (request == null)
             {
-                throw new InvalidPersonDataException("Request body is required.");
+                throw new InvalidPersonDataException("Request body is empty!");
             }
 
             if (string.IsNullOrWhiteSpace(request.FirstName) && string.IsNullOrWhiteSpace(request.LastName))
@@ -78,8 +78,7 @@ namespace assecor_assesment_api.Controllers
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Address = request.Address,
-                Color = request.Color,
-                Group = null
+                Color = request.Color
             };
 
             var createdPerson = await _repo.AddPersonAsync(person, cancellationToken);

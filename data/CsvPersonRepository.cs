@@ -160,7 +160,6 @@ namespace assecor_assesment_api.Data
                 LastName = lastName,
                 FirstName = firstName,
                 Address = address,
-                Group = null,
                 Color = color
             };
         }
