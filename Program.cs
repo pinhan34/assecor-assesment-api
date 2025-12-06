@@ -1,15 +1,39 @@
 using assecor_assesment_api.Data;
 using assecor_assesment_api.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Register repository
-builder.Services.AddSingleton<IPersonRepository, CsvPersonRepository>();
+// Register DbContext for SQLite
+builder.Services.AddDbContext<PersonDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register repository based on configuration
+var useDatabase = builder.Configuration.GetValue<bool>("UseDatabase");
+
+if (useDatabase)
+{
+    builder.Services.AddScoped<IPersonRepository, DatabasePersonRepository>();
+}
+else
+{
+    builder.Services.AddSingleton<IPersonRepository, CsvPersonRepository>();
+}
 
 var app = builder.Build();
+
+// Initialize database if using database mode
+if (useDatabase)
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<PersonDbContext>();
+        dbContext.Database.EnsureCreated(); // Creates database if it doesn't exist
+    }
+}
 
 // Configure the HTTP request pipeline.
 
