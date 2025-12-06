@@ -1,7 +1,7 @@
 using assecor_assesment_api.Data;
 using assecor_assesment_api.Models;
-using Microsoft.AspNetCore.Mvc;
 using assecor_assesment_api.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace assecor_assesment_api.Controllers
 {
@@ -31,17 +31,20 @@ namespace assecor_assesment_api.Controllers
             return Ok(p);
         }
 
-        [HttpGet("color/{color:int}")]
-        public async Task<IActionResult> GetByColor(int color, CancellationToken cancellationToken)
+        [HttpGet("color/{colorName}")]
+        public async Task<IActionResult> GetByColorName(string colorName, CancellationToken cancellationToken)
         {
-            // Validate color is in the enumerated range (1-7)
-            if (color < 1 || color > 7)
+            // Try to parse the color name to enum
+            if (!Enum.TryParse<ColorEnum>(colorName, ignoreCase: true, out var colorEnum))
             {
-                throw new ColorNotFoundInTheListException(color);
+                throw new ColorNotFoundInTheListException(colorName);
             }
 
+            // Convert enum to integer value
+            int colorValue = (int)colorEnum;
+
             var people = await _repo.GetAllAsync(cancellationToken);
-            var filtered = people.Where(p => p.Color == color).ToList();
+            var filtered = people.Where(p => p.Color == colorValue).ToList();
             return Ok(filtered);
         }
 

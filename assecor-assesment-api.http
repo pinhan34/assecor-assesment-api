@@ -1,6 +1,111 @@
 @assecor_assesment_api_HostAddress = http://localhost:5033
 
-GET {{assecor_assesment_api_HostAddress}}/weatherforecast/
+### Get all persons
+GET {{assecor_assesment_api_HostAddress}}/persons
 Accept: application/json
+
+###
+
+### Get person by ID (line number)
+GET {{assecor_assesment_api_HostAddress}}/persons/1
+Accept: application/json
+
+###
+
+### Get person by ID (another example)
+GET {{assecor_assesment_api_HostAddress}}/persons/5
+Accept: application/json
+
+###
+
+### Get person by ID (non-existent - should return 404)
+GET {{assecor_assesment_api_HostAddress}}/persons/999
+Accept: application/json
+
+###
+
+### Get persons by color name (Blau - Blue)
+GET {{assecor_assesment_api_HostAddress}}/persons/color/Blau
+Accept: application/json
+
+###
+
+### Get persons by color name (Grün - Green)
+GET {{assecor_assesment_api_HostAddress}}/persons/color/Grün
+Accept: application/json
+
+###
+
+### Get persons by color name (Violett - Purple)
+GET {{assecor_assesment_api_HostAddress}}/persons/color/Violett
+Accept: application/json
+
+###
+
+### Get persons by color name (Rot - Red)
+GET {{assecor_assesment_api_HostAddress}}/persons/color/Rot
+Accept: application/json
+
+###
+
+### Get persons by color name (case insensitive - "blau")
+GET {{assecor_assesment_api_HostAddress}}/persons/color/blau
+Accept: application/json
+
+###
+
+### Get persons by color name (invalid color name - should return 404 with error details)
+GET {{assecor_assesment_api_HostAddress}}/persons/color/Purple
+Accept: application/json
+
+###
+
+### Create a new person (full data)
+POST {{assecor_assesment_api_HostAddress}}/persons
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "address": "123 Main Street, New York",
+  "color": 3
+}
+
+###
+
+### Create a new person (minimal data - only first name)
+POST {{assecor_assesment_api_HostAddress}}/persons
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": null,
+  "address": null,
+  "color": null
+}
+
+###
+
+### Create a new person (no names - should return 400)
+POST {{assecor_assesment_api_HostAddress}}/persons
+Content-Type: application/json
+
+{
+  "firstName": null,
+  "lastName": null,
+  "address": "Some Address"
+}
+
+###
+
+### Create a new person (invalid color - should return 400)
+POST {{assecor_assesment_api_HostAddress}}/persons
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User",
+  "color": 10
+}
 
 ###

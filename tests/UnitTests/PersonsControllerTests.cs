@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using assecor_assesment_api.Data;
 using assecor_assesment_api.Models;
+using assecor_assesment_api.Exceptions;
 using System.Threading.Tasks;
 using assecor_assesment_api.Controllers;
 using Microsoft.Extensions.Configuration;
@@ -67,19 +68,19 @@ namespace assecor_assesment_api.UnitTests
         }
 
         [Fact]
-        public async Task GetByColor_ReturnsPersonsWithThatColor()
+        public async Task GetByColorName_ReturnsPersonsWithThatColor()
         {
             var controller = new PersonsController(new FakeRepo());
 
-            // Color 1 should return 2 persons (Hans and Jane)
-            var result = await controller.GetByColor(1, CancellationToken.None) as OkObjectResult;
+            // Color "Blau" (1) should return 2 persons (Hans and Jane)
+            var result = await controller.GetByColorName("Blau", CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
             var people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
             Assert.Equal(2, people.Count());
             Assert.All(people, p => Assert.Equal(1, p.Color));
 
-            // Color 2 should return 1 person (Johnny)
-            result = await controller.GetByColor(2, CancellationToken.None) as OkObjectResult;
+            // Color "Grün" (2) should return 1 person (Johnny)
+            result = await controller.GetByColorName("Grün", CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
             people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
             Assert.Single(people);
@@ -87,14 +88,38 @@ namespace assecor_assesment_api.UnitTests
         }
 
         [Fact]
-        public void GetByColor_ThrowsColorNotFoundExceptionForInvalidColor()
+        public async Task GetByColorName_IsCaseInsensitive()
         {
             var controller = new PersonsController(new FakeRepo());
 
-            // Color 99 is out of range (1-7)
-            var exception = Record.Exception(() => controller.GetByColor(99, CancellationToken.None).GetAwaiter().GetResult());
+            // Test lowercase
+            var result = await controller.GetByColorName("blau", CancellationToken.None) as OkObjectResult;
+            Assert.NotNull(result);
+            var people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            Assert.Equal(2, people.Count());
+
+            // Test uppercase
+            result = await controller.GetByColorName("VIOLETT", CancellationToken.None) as OkObjectResult;
+            Assert.NotNull(result);
+            people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            Assert.Single(people);
+            Assert.Equal(3, people.First().Color);
+        }
+
+        [Fact]
+        public void GetByColorName_ReturnsBadRequestForInvalidColorName()
+        {
+            var controller = new PersonsController(new FakeRepo());
+
+            var exception = Assert.Throws<ColorNotFoundInTheListException>(() =>
+            {
+                controller.GetByColorName("Purple", CancellationToken.None).GetAwaiter().GetResult();
+            });
+
             Assert.NotNull(exception);
-            Assert.IsType<assecor_assesment_api.Exceptions.ColorNotFoundInTheListException>(exception);
+            Assert.Equal("Purple", exception.RequestedColor);
+            Assert.Contains("Purple", exception.Message);
+            Assert.Contains("Blau", exception.Message);
         }
 
         [Fact]

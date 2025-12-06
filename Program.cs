@@ -12,7 +12,6 @@ builder.Services.AddSingleton<IPersonRepository, CsvPersonRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// (No OpenAPI/OpenAPI mapping required for these tests)
 
 // Exception handler for ColorNotFoundInTheListException
 app.UseExceptionHandler(errorApp =>
@@ -29,7 +28,8 @@ app.UseExceptionHandler(errorApp =>
 			await context.Response.WriteAsJsonAsync(new
 			{
 				error = colorException.Message,
-				colorId = colorException.RequestedColor
+				requestedColor = colorException.RequestedColor,
+				validColors = new[] { "Blau", "Grün", "Violett", "Rot", "Gelb", "Türkis", "Weiß" }
 			});
 			return;
 		}
