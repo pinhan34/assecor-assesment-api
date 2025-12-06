@@ -44,5 +44,44 @@ namespace assecor_assesment_api.Controllers
             var filtered = people.Where(p => p.Color == color).ToList();
             return Ok(filtered);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePerson([FromBody] CreatePersonRequest request, CancellationToken cancellationToken)
+        {
+            // Validate request
+            if (request == null)
+            {
+                return BadRequest("Request body is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.FirstName) && string.IsNullOrWhiteSpace(request.LastName))
+            {
+                return BadRequest("At least one of FirstName or LastName is required.");
+            }
+
+            if (request.Color.HasValue && (request.Color < 1 || request.Color > 7))
+            {
+                return BadRequest("Color must be between 1 and 7.");
+            }
+
+            try
+            {
+                var person = new Person
+                {
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Address = request.Address,
+                    Color = request.Color,
+                    Group = null
+                };
+
+                var createdPerson = await _repo.AddPersonAsync(person, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { id = createdPerson.Id }, createdPerson);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
