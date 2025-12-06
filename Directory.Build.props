@@ -9,7 +9,7 @@
     <Company>Assecor</Company>
     <Product>Assecor Assessment API</Product>
     <Description>RESTful API for reading and querying person data from CSV files</Description>
-    <Authors>Development Team</Authors>
+    <Authors>Development Onur</Authors>
     <RepositoryUrl>https://github.com/pinhan34/assecor-assesment-api</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

@@ -127,8 +127,7 @@ Johnson, Johnny, 88888 made up, 3";
         [Fact]
         public async Task ParseLine_HandlesRowWithMissingAddress()
         {
-            var csv = @"Bart, Bertram, 
-Müller, Hans, 67742 Lauterecken, 1";
+            var csv = @"Bart, Bertram, Müller, Hans, 67742 Lauterecken, 1";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
