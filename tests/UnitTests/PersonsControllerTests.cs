@@ -47,7 +47,7 @@ namespace assecor_assesment_api.UnitTests
             var controller = new PersonsController(new FakeRepo());
             var result = await controller.GetAllPersons(CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
-            var people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            var people = Assert.IsAssignableFrom<IEnumerable<PersonResponseDto>>(result.Value);
             Assert.Equal(4, people.Count());
         }
 
@@ -58,7 +58,7 @@ namespace assecor_assesment_api.UnitTests
 
             var ok = await controller.GetPersonById(3, CancellationToken.None) as OkObjectResult;
             Assert.NotNull(ok);
-            var p = Assert.IsType<Person>(ok.Value);
+            var p = Assert.IsType<PersonResponseDto>(ok.Value);
             Assert.Equal(3, p.Id);
         }
 
@@ -85,16 +85,16 @@ namespace assecor_assesment_api.UnitTests
             // Color "Blau" (1) should return 2 persons (Hans and Jane)
             var result = await controller.GetPersonsByColorName("Blau", CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
-            var people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            var people = Assert.IsAssignableFrom<IEnumerable<PersonResponseDto>>(result.Value);
             Assert.Equal(2, people.Count());
-            Assert.All(people, p => Assert.Equal(1, p.Color));
+            Assert.All(people, p => Assert.Equal("blau", p.Color));
 
             // Color "Grün" (2) should return 1 person (Johnny)
             result = await controller.GetPersonsByColorName("Grün", CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
-            people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            people = Assert.IsAssignableFrom<IEnumerable<PersonResponseDto>>(result.Value);
             Assert.Single(people);
-            Assert.Equal(2, people.First().Color);
+            Assert.Equal("grün", people.First().Color);
         }
 
         [Fact]
@@ -105,15 +105,15 @@ namespace assecor_assesment_api.UnitTests
             // Test lowercase
             var result = await controller.GetPersonsByColorName("blau", CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
-            var people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            var people = Assert.IsAssignableFrom<IEnumerable<PersonResponseDto>>(result.Value);
             Assert.Equal(2, people.Count());
 
             // Test uppercase
             result = await controller.GetPersonsByColorName("VIOLETT", CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
-            people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
+            people = Assert.IsAssignableFrom<IEnumerable<PersonResponseDto>>(result.Value);
             Assert.Single(people);
-            Assert.Equal(3, people.First().Color);
+            Assert.Equal("violett", people.First().Color);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace assecor_assesment_api.UnitTests
             { 
                 FirstName = "New", 
                 LastName = "Person", 
-                Address = "123 Main St", 
+                Address = "12345 Main St", 
                 Color = 3 
             };
 
@@ -148,11 +148,12 @@ namespace assecor_assesment_api.UnitTests
             Assert.NotNull(result);
             Assert.Equal(nameof(PersonsController.GetPersonById), result.ActionName);
             
-            var person = Assert.IsType<Person>(result.Value);
-            Assert.Equal("New", person.FirstName);
+            var person = Assert.IsType<PersonResponseDto>(result.Value);
+            Assert.Equal("New", person.Name);
             Assert.Equal("Person", person.LastName);
-            Assert.Equal("123 Main St", person.Address);
-            Assert.Equal(3, person.Color);
+            Assert.Equal("12345", person.ZipCode);
+            Assert.Equal("Main St", person.City);
+            Assert.Equal("violett", person.Color);
             Assert.True(person.Id > 0);
         }
 
@@ -211,10 +212,10 @@ namespace assecor_assesment_api.UnitTests
             var result = await controller.CreatePerson(request, CancellationToken.None) as CreatedAtActionResult;
             Assert.NotNull(result);
             
-            var person = Assert.IsType<Person>(result.Value);
-            Assert.Equal("John", person.FirstName);
+            var person = Assert.IsType<PersonResponseDto>(result.Value);
+            Assert.Equal("John", person.Name);
             Assert.Null(person.LastName);
-            Assert.Null(person.Address);
+            Assert.Null(person.City);
             Assert.Null(person.Color);
         }
     }

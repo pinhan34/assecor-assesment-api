@@ -20,14 +20,16 @@ namespace assecor_assesment_api.Controllers
         public async Task<IActionResult> GetAllPersons(CancellationToken cancellationToken)
         {
             var people = await _repo.GetAllPersonsAsync(cancellationToken);
-            return Ok(people);
+            var dtos = people.Select(PersonResponseDto.FromPerson).ToList();
+            return Ok(dtos);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetPersonById(int id, CancellationToken cancellationToken)
         {
             var p = await _repo.GetPersonByIdAsync(id, cancellationToken) ?? throw new PersonNotFoundException(id);
-            return Ok(p);
+            var dto = PersonResponseDto.FromPerson(p);
+            return Ok(dto);
         }
 
         [HttpGet("color/{colorName}")]
@@ -44,7 +46,8 @@ namespace assecor_assesment_api.Controllers
 
             var people = await _repo.GetAllPersonsAsync(cancellationToken);
             var filtered = people.Where(p => p.Color == colorValue).ToList();
-            return Ok(filtered);
+            var dtos = filtered.Select(PersonResponseDto.FromPerson).ToList();
+            return Ok(dtos);
         }
 
         [HttpPost]
@@ -82,7 +85,8 @@ namespace assecor_assesment_api.Controllers
             };
 
             var createdPerson = await _repo.AddPersonAsync(person, cancellationToken);
-            return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.Id }, createdPerson);
+            var dto = PersonResponseDto.FromPerson(createdPerson);
+            return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.Id }, dto);
         }
     }
 }
