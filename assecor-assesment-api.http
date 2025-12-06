@@ -48,6 +48,19 @@ Accept: application/json
 
 ###
 
+### Create a new person (Test Insert)
+POST {{assecor_assesment_api_HostAddress}}/persons
+Content-Type: application/json
+
+{
+  "firstName": "Onur",
+  "lastName": "Erol",
+  "address": "67890 Malmoer Str",
+  "color": 6
+}
+
+###
+
 ### Get persons by color name (case insensitive - "blau")
 GET {{assecor_assesment_api_HostAddress}}/persons/color/blau
 Accept: application/json
