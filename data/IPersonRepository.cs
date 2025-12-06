@@ -4,8 +4,8 @@ namespace assecor_assesment_api.Data
 {
     public interface IPersonRepository
     {
-        Task<IEnumerable<Person>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<Person?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Person>> GetAllPersonsAsync(CancellationToken cancellationToken = default);
+        Task<Person?> GetPersonByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default);
     }
 }

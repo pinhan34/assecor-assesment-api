@@ -17,7 +17,7 @@ namespace assecor_assesment_api.UnitTests
 {
     public class PersonsControllerTests
     {
-        private class FakeRepo : IPersonRepository
+        private class MockRepo : IPersonRepository
         {
             private readonly List<Person> _items = new()
             {
@@ -27,7 +27,7 @@ namespace assecor_assesment_api.UnitTests
                 new Person { Id = 7, FirstName = "Bob", LastName = "Smith", Address = "D", Color = 3 }
             };
 
-            public Task<IEnumerable<Person>> GetAllAsync(CancellationToken cancellationToken = default)
+            public Task<IEnumerable<Person>> GetAllPersonsAsync(CancellationToken cancellationToken = default)
                 => Task.FromResult<IEnumerable<Person>>(_items);
 
             public Task<Person?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -46,7 +46,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public async Task GetAll_ReturnsAllPersons()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
             var result = await controller.GetAll(CancellationToken.None) as OkObjectResult;
             Assert.NotNull(result);
             var people = Assert.IsAssignableFrom<IEnumerable<Person>>(result.Value);
@@ -56,7 +56,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public async Task GetById_ReturnsPerson_WhenExists()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
 
             var ok = await controller.GetById(3, CancellationToken.None) as OkObjectResult;
             Assert.NotNull(ok);
@@ -67,7 +67,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public void GetById_ThrowsPersonNotFoundException_WhenMissing()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
 
             var exception = Assert.Throws<PersonNotFoundException>(() =>
             {
@@ -82,7 +82,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public async Task GetByColorName_ReturnsPersonsWithThatColor()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
 
             // Color "Blau" (1) should return 2 persons (Hans and Jane)
             var result = await controller.GetByColorName("Blau", CancellationToken.None) as OkObjectResult;
@@ -102,7 +102,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public async Task GetByColorName_IsCaseInsensitive()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
 
             // Test lowercase
             var result = await controller.GetByColorName("blau", CancellationToken.None) as OkObjectResult;
@@ -121,7 +121,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public void GetByColorName_ReturnsBadRequestForInvalidColorName()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
 
             var exception = Assert.Throws<ColorNotFoundInTheListException>(() =>
             {
@@ -137,7 +137,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public async Task CreatePerson_CreatesNewPerson()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
             var request = new CreatePersonRequest 
             { 
                 FirstName = "New", 
@@ -161,7 +161,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public void CreatePerson_ThrowsInvalidPersonDataException_ForMissingNames()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
             var request = new CreatePersonRequest 
             { 
                 FirstName = null, 
@@ -181,7 +181,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public void CreatePerson_ThrowsInvalidPersonDataException_ForInvalidColor()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
             var request = new CreatePersonRequest 
             { 
                 FirstName = "Test", 
@@ -201,7 +201,7 @@ namespace assecor_assesment_api.UnitTests
         [Fact]
         public async Task CreatePerson_AllowsNullOptionalFields()
         {
-            var controller = new PersonsController(new FakeRepo());
+            var controller = new PersonsController(new MockRepo());
             var request = new CreatePersonRequest 
             { 
                 FirstName = "John",

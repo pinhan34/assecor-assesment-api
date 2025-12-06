@@ -17,7 +17,7 @@ namespace assecor_assesment_api.Data
                 : configured!;
         }
 
-        public async Task<IEnumerable<Person>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Person>> GetAllPersonsAsync(CancellationToken cancellationToken = default)
         {
             var list = new List<Person>();
             
@@ -53,7 +53,7 @@ namespace assecor_assesment_api.Data
             return list;
         }
 
-        public async Task<Person?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<Person?> GetPersonByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             if (!File.Exists(_filePath))
             {

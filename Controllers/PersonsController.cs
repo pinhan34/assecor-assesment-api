@@ -17,22 +17,21 @@ namespace assecor_assesment_api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllPersons(CancellationToken cancellationToken)
         {
-            var people = await _repo.GetAllAsync(cancellationToken);
+            var people = await _repo.GetAllPersonsAsync(cancellationToken);
             return Ok(people);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetPersonById(int id, CancellationToken cancellationToken)
         {
-            var p = await _repo.GetByIdAsync(id, cancellationToken);
-            if (p == null) throw new PersonNotFoundException(id);
+            var p = await _repo.GetPersonByIdAsync(id, cancellationToken) ?? throw new PersonNotFoundException(id);
             return Ok(p);
         }
 
         [HttpGet("color/{colorName}")]
-        public async Task<IActionResult> GetByColorName(string colorName, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetPersonsByColorName(string colorName, CancellationToken cancellationToken)
         {
             // Try to parse the color name to enum
             if (!Enum.TryParse<ColorEnum>(colorName, ignoreCase: true, out var colorEnum))
@@ -43,7 +42,7 @@ namespace assecor_assesment_api.Controllers
             // Convert enum to integer value
             int colorValue = (int)colorEnum;
 
-            var people = await _repo.GetAllAsync(cancellationToken);
+            var people = await _repo.GetAllPersonsAsync(cancellationToken);
             var filtered = people.Where(p => p.Color == colorValue).ToList();
             return Ok(filtered);
         }
@@ -84,7 +83,7 @@ namespace assecor_assesment_api.Controllers
             };
 
             var createdPerson = await _repo.AddPersonAsync(person, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = createdPerson.Id }, createdPerson);
+            return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.Id }, createdPerson);
         }
     }
 }
