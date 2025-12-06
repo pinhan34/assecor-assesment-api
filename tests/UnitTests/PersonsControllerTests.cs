@@ -54,7 +54,7 @@ namespace assecor_assesment_api.UnitTests
         }
 
         [Fact]
-        public async Task GetById_ReturnsPerson_WhenExists_And_NotFound_WhenMissing()
+        public async Task GetById_ReturnsPerson_WhenExists()
         {
             var controller = new PersonsController(new FakeRepo());
 
@@ -62,9 +62,21 @@ namespace assecor_assesment_api.UnitTests
             Assert.NotNull(ok);
             var p = Assert.IsType<Person>(ok.Value);
             Assert.Equal(3, p.Id);
+        }
 
-            var notFound = await controller.GetById(999, CancellationToken.None) as NotFoundResult;
-            Assert.NotNull(notFound);
+        [Fact]
+        public void GetById_ThrowsPersonNotFoundException_WhenMissing()
+        {
+            var controller = new PersonsController(new FakeRepo());
+
+            var exception = Assert.Throws<PersonNotFoundException>(() =>
+            {
+                controller.GetById(999, CancellationToken.None).GetAwaiter().GetResult();
+            });
+
+            Assert.NotNull(exception);
+            Assert.Equal(999, exception.RequestedId);
+            Assert.Contains("999", exception.Message);
         }
 
         [Fact]
@@ -147,7 +159,7 @@ namespace assecor_assesment_api.UnitTests
         }
 
         [Fact]
-        public async Task CreatePerson_ReturnsValidationErrorForMissingNames()
+        public void CreatePerson_ThrowsInvalidPersonDataException_ForMissingNames()
         {
             var controller = new PersonsController(new FakeRepo());
             var request = new CreatePersonRequest 
@@ -157,13 +169,17 @@ namespace assecor_assesment_api.UnitTests
                 Address = "123 Main St" 
             };
 
-            var result = await controller.CreatePerson(request, CancellationToken.None) as BadRequestObjectResult;
-            Assert.NotNull(result);
-            Assert.Contains("At least one of FirstName or LastName", result.Value?.ToString() ?? "");
+            var exception = Assert.Throws<InvalidPersonDataException>(() =>
+            {
+                controller.CreatePerson(request, CancellationToken.None).GetAwaiter().GetResult();
+            });
+
+            Assert.NotNull(exception);
+            Assert.Contains(exception.ValidationErrors, e => e.Contains("FirstName or LastName"));
         }
 
         [Fact]
-        public async Task CreatePerson_ReturnsValidationErrorForInvalidColor()
+        public void CreatePerson_ThrowsInvalidPersonDataException_ForInvalidColor()
         {
             var controller = new PersonsController(new FakeRepo());
             var request = new CreatePersonRequest 
@@ -173,9 +189,13 @@ namespace assecor_assesment_api.UnitTests
                 Color = 10 // Invalid: must be 1-7
             };
 
-            var result = await controller.CreatePerson(request, CancellationToken.None) as BadRequestObjectResult;
-            Assert.NotNull(result);
-            Assert.Contains("Color must be between 1 and 7", result.Value?.ToString() ?? "");
+            var exception = Assert.Throws<InvalidPersonDataException>(() =>
+            {
+                controller.CreatePerson(request, CancellationToken.None).GetAwaiter().GetResult();
+            });
+
+            Assert.NotNull(exception);
+            Assert.Contains(exception.ValidationErrors, e => e.Contains("Color must be between 1 and 7"));
         }
 
         [Fact]

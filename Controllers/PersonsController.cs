@@ -27,7 +27,7 @@ namespace assecor_assesment_api.Controllers
         public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
             var p = await _repo.GetByIdAsync(id, cancellationToken);
-            if (p == null) return NotFound();
+            if (p == null) throw new PersonNotFoundException(id);
             return Ok(p);
         }
 
@@ -52,39 +52,39 @@ namespace assecor_assesment_api.Controllers
         public async Task<IActionResult> CreatePerson([FromBody] CreatePersonRequest request, CancellationToken cancellationToken)
         {
             // Validate request
+            var validationErrors = new List<string>();
+
             if (request == null)
             {
-                return BadRequest("Request body is required.");
+                throw new InvalidPersonDataException("Request body is required.");
             }
 
             if (string.IsNullOrWhiteSpace(request.FirstName) && string.IsNullOrWhiteSpace(request.LastName))
             {
-                return BadRequest("At least one of FirstName or LastName is required.");
+                validationErrors.Add("At least one of FirstName or LastName is required.");
             }
 
             if (request.Color.HasValue && (request.Color < 1 || request.Color > 7))
             {
-                return BadRequest("Color must be between 1 and 7.");
+                validationErrors.Add("Color must be between 1 and 7.");
             }
 
-            try
+            if (validationErrors.Any())
             {
-                var person = new Person
-                {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName,
-                    Address = request.Address,
-                    Color = request.Color,
-                    Group = null
-                };
+                throw new InvalidPersonDataException(validationErrors);
+            }
 
-                var createdPerson = await _repo.AddPersonAsync(person, cancellationToken);
-                return CreatedAtAction(nameof(GetById), new { id = createdPerson.Id }, createdPerson);
-            }
-            catch (ArgumentException ex)
+            var person = new Person
             {
-                return BadRequest(ex.Message);
-            }
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Address = request.Address,
+                Color = request.Color,
+                Group = null
+            };
+
+            var createdPerson = await _repo.AddPersonAsync(person, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = createdPerson.Id }, createdPerson);
         }
     }
 }
