@@ -57,6 +57,47 @@ namespace assecor_assesment_api.Data
             return null;
         }
 
+        public async Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Validate: at least one name required
+            if (string.IsNullOrWhiteSpace(person.FirstName) && string.IsNullOrWhiteSpace(person.LastName))
+            {
+                throw new ArgumentException("At least one of FirstName or LastName is required.");
+            }
+
+            // Validate color if provided
+            if (person.Color.HasValue && (person.Color < 1 || person.Color > 7))
+            {
+                throw new ArgumentException("Color must be between 1 and 7.");
+            }
+
+            // Create CSV line: LastName, FirstName, Address, Color
+            var lastName = person.LastName ?? string.Empty;
+            var firstName = person.FirstName ?? string.Empty;
+            var address = person.Address ?? string.Empty;
+            var colorStr = person.Color?.ToString() ?? string.Empty;
+
+            var csvLine = $"{lastName}, {firstName}, {address}, {colorStr}";
+
+            // Append to CSV file on a background thread (with lock for thread safety)
+            await Task.Run(() =>
+            {
+                lock (_filePath)
+                {
+                    File.AppendAllText(_filePath, csvLine + Environment.NewLine);
+                }
+            }, cancellationToken);
+
+            // Return the created person with the new ID (next line number)
+            // Count lines to get the next ID
+            var lineCount = File.ReadAllLines(_filePath).Length;
+            person.Id = lineCount;
+
+            return person;
+        }
+
         private Person? ParseLine(string line, int lineNumber)
         {
             if (string.IsNullOrWhiteSpace(line)) return null;

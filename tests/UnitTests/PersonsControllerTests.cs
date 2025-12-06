@@ -31,6 +31,15 @@ namespace assecor_assesment_api.UnitTests
 
             public Task<Person?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
                 => Task.FromResult(_items.FirstOrDefault(p => p.Id == id));
+
+            public Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
+            {
+                // Assign next ID
+                var nextId = _items.Any() ? _items.Max(p => p.Id) + 1 : 1;
+                person.Id = nextId;
+                _items.Add(person);
+                return Task.FromResult(person);
+            }
         }
 
         [Fact]
@@ -87,6 +96,84 @@ namespace assecor_assesment_api.UnitTests
             Assert.NotNull(exception);
             Assert.IsType<assecor_assesment_api.Exceptions.ColorNotFoundInTheListException>(exception);
         }
+
+        [Fact]
+        public async Task CreatePerson_CreatesNewPerson()
+        {
+            var controller = new PersonsController(new FakeRepo());
+            var request = new CreatePersonRequest 
+            { 
+                FirstName = "New", 
+                LastName = "Person", 
+                Address = "123 Main St", 
+                Color = 3 
+            };
+
+            var result = await controller.CreatePerson(request, CancellationToken.None) as CreatedAtActionResult;
+            Assert.NotNull(result);
+            Assert.Equal(nameof(PersonsController.GetById), result.ActionName);
+            
+            var person = Assert.IsType<Person>(result.Value);
+            Assert.Equal("New", person.FirstName);
+            Assert.Equal("Person", person.LastName);
+            Assert.Equal("123 Main St", person.Address);
+            Assert.Equal(3, person.Color);
+            Assert.True(person.Id > 0);
+        }
+
+        [Fact]
+        public async Task CreatePerson_ReturnsValidationErrorForMissingNames()
+        {
+            var controller = new PersonsController(new FakeRepo());
+            var request = new CreatePersonRequest 
+            { 
+                FirstName = null, 
+                LastName = null, 
+                Address = "123 Main St" 
+            };
+
+            var result = await controller.CreatePerson(request, CancellationToken.None) as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Contains("At least one of FirstName or LastName", result.Value?.ToString() ?? "");
+        }
+
+        [Fact]
+        public async Task CreatePerson_ReturnsValidationErrorForInvalidColor()
+        {
+            var controller = new PersonsController(new FakeRepo());
+            var request = new CreatePersonRequest 
+            { 
+                FirstName = "Test", 
+                LastName = "User", 
+                Color = 10 // Invalid: must be 1-7
+            };
+
+            var result = await controller.CreatePerson(request, CancellationToken.None) as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Contains("Color must be between 1 and 7", result.Value?.ToString() ?? "");
+        }
+
+        [Fact]
+        public async Task CreatePerson_AllowsNullOptionalFields()
+        {
+            var controller = new PersonsController(new FakeRepo());
+            var request = new CreatePersonRequest 
+            { 
+                FirstName = "John",
+                LastName = null,
+                Address = null,
+                Color = null
+            };
+
+            var result = await controller.CreatePerson(request, CancellationToken.None) as CreatedAtActionResult;
+            Assert.NotNull(result);
+            
+            var person = Assert.IsType<Person>(result.Value);
+            Assert.Equal("John", person.FirstName);
+            Assert.Null(person.LastName);
+            Assert.Null(person.Address);
+            Assert.Null(person.Color);
+        }
     }
 
     public class CsvPersonRepositoryTests
@@ -127,7 +214,8 @@ Johnson, Johnny, 88888 made up, 3";
         [Fact]
         public async Task ParseLine_HandlesRowWithMissingAddress()
         {
-            var csv = @"Bart, Bertram, Müller, Hans, 67742 Lauterecken, 1";
+            var csv = @"Bart, Bertram, 
+Müller, Hans, 67742 Lauterecken, 1";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -222,9 +310,9 @@ Johnson, Johnny, 88888 made up, 3";
         [Fact]
         public async Task GetByIdAsync_ReturnsPersonByLineNumber()
         {
-            var csv = @"Müller, Hans, 67742 Lauterecken, 1 Petersen, 
-                        Peter, 18439 Stralsund, 2
-                        Johnson, Johnny, 88888 made up, 3";
+            var csv = @"Müller, Hans, 67742 Lauterecken, 1
+Petersen, Peter, 18439 Stralsund, 2
+Johnson, Johnny, 88888 made up, 3";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
@@ -252,7 +340,8 @@ Johnson, Johnny, 88888 made up, 3";
         public async Task ParseLine_HandlesEmptyLines()
         {
             var csv = @"Müller, Hans, 67742 Lauterecken, 1
-                        Petersen, Peter, 18439 Stralsund, 2";
+
+Petersen, Peter, 18439 Stralsund, 2";
 
             var config = CreateTestConfiguration(csv);
             var repo = new CsvPersonRepository(config);
