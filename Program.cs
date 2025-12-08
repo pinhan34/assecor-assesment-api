@@ -20,7 +20,7 @@ if (useDatabase)
 }
 else
 {
-    builder.Services.AddSingleton<IPersonRepository, CsvPersonRepository>();
+    builder.Services.AddScoped<IPersonRepository, CsvPersonRepository>();
 }
 
 var app = builder.Build();
