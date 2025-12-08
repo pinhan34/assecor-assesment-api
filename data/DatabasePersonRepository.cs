@@ -25,6 +25,14 @@ namespace assecor_assesment_api.Data
                 .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         }
 
+        public async Task<IEnumerable<Person>> GetPersonsByColorAsync(int color, CancellationToken cancellationToken = default)
+        {
+            return await _context.Persons
+                .Where(p => p.Color == color)
+                .OrderBy(p => p.Id)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
         {
             _context.Persons.Add(person);

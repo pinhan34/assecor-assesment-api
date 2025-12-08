@@ -44,9 +44,8 @@ namespace assecor_assesment_api.Controllers
             // Convert enum to integer value
             int colorValue = (int)colorEnum;
 
-            var people = await _repo.GetAllPersonsAsync(cancellationToken);
-            var filtered = people.Where(p => p.Color == colorValue).ToList();
-            var dtos = filtered.Select(PersonResponseDto.FromPerson).ToList();
+            var people = await _repo.GetPersonsByColorAsync(colorValue, cancellationToken);
+            var dtos = people.Select(PersonResponseDto.FromPerson).ToList();
             return Ok(dtos);
         }
 

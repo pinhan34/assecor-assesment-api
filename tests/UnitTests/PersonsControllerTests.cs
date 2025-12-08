@@ -31,6 +31,9 @@ namespace assecor_assesment_api.UnitTests
             public Task<Person?> GetPersonByIdAsync(int id, CancellationToken cancellationToken = default)
                 => Task.FromResult(_items.FirstOrDefault(p => p.Id == id));
 
+            public Task<IEnumerable<Person>> GetPersonsByColorAsync(int color, CancellationToken cancellationToken = default)
+                => Task.FromResult<IEnumerable<Person>>(_items.Where(p => p.Color == color).ToList());
+
             public Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
             {
                 // Assign next ID

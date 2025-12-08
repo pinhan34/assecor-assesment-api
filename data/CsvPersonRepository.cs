@@ -87,6 +87,45 @@ namespace assecor_assesment_api.Data
             return null;
         }
 
+        public async Task<IEnumerable<Person>> GetPersonsByColorAsync(int color, CancellationToken cancellationToken = default)
+        {
+            var list = new List<Person>();
+            
+            if (!File.Exists(_filePath))
+            {
+                throw new CsvFileException($"CSV file not found at path: {_filePath}", _filePath, CsvFileOperation.Access);
+            }
+
+            try
+            {
+                using var stream = File.OpenRead(_filePath);
+                using var reader = new StreamReader(stream);
+
+                string? line;
+                int lineNumber = 0;
+                while ((line = await reader.ReadLineAsync()) != null)
+                {
+                    lineNumber++;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var p = ParseLine(line, lineNumber);
+                    if (p != null && p.Color == color)
+                    {
+                        list.Add(p);
+                    }
+                }
+            }
+            catch (IOException ex)
+            {
+                throw new CsvFileException($"Error reading CSV file: {ex.Message}", _filePath, CsvFileOperation.Read, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                throw new CsvFileException($"Access denied to CSV file: {ex.Message}", _filePath, CsvFileOperation.Access, ex);
+            }
+
+            return list;
+        }
+
         public async Task<Person> AddPersonAsync(Person person, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

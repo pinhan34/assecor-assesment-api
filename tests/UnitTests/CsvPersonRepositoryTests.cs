@@ -159,5 +159,40 @@ namespace assecor_assesment_api.UnitTests
             Assert.Equal(1, people[0].Id);
             Assert.Equal(3, people[1].Id); // Line 3 (line 2 was empty)
         }
+
+        [Fact]
+        public async Task GetPersonsByColorAsync_ReturnsOnlyMatchingColor()
+        {
+            var csv = CreateCsv(
+                "Müller, Hans, 67742 Lauterecken, 1",
+                "Petersen, Peter, 18439 Stralsund, 2",
+                "Johnson, Johnny, 88888 made up, 1",
+                "Doe, Jane, 12345 Street, 3"
+            );
+
+            var config = CreateTestConfiguration(csv);
+            var repo = new CsvPersonRepository(config);
+            
+            var bluePersons = (await repo.GetPersonsByColorAsync(1)).ToList();
+            Assert.Equal(2, bluePersons.Count);
+            Assert.All(bluePersons, p => Assert.Equal(1, p.Color));
+            Assert.Contains(bluePersons, p => p.FirstName == "Hans");
+            Assert.Contains(bluePersons, p => p.FirstName == "Johnny");
+        }
+
+        [Fact]
+        public async Task GetPersonsByColorAsync_ReturnsEmpty_WhenNoMatches()
+        {
+            var csv = CreateCsv(
+                "Müller, Hans, 67742 Lauterecken, 1",
+                "Petersen, Peter, 18439 Stralsund, 2"
+            );
+
+            var config = CreateTestConfiguration(csv);
+            var repo = new CsvPersonRepository(config);
+            
+            var persons = (await repo.GetPersonsByColorAsync(7)).ToList();
+            Assert.Empty(persons);
+        }
     }
 }

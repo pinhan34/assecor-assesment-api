@@ -163,5 +163,46 @@ namespace assecor_assesment_api.UnitTests
             // Assert
             Assert.Equal(initialCount + 1, newCount);
         }
+
+        [Fact]
+        public async Task GetPersonsByColorAsync_ReturnsOnlyMatchingColor()
+        {
+            // Arrange - seed data has persons with colors 1, 2, 3
+            
+            // Act
+            var bluePersons = (await _repository.GetPersonsByColorAsync(1)).ToList();
+
+            // Assert
+            Assert.NotEmpty(bluePersons);
+            Assert.All(bluePersons, p => Assert.Equal(1, p.Color));
+            Assert.Contains(bluePersons, p => p.FirstName == "Hans");
+        }
+
+        [Fact]
+        public async Task GetPersonsByColorAsync_ReturnsEmpty_WhenNoMatches()
+        {
+            // Arrange - no persons with color 7 in seed data
+            
+            // Act
+            var persons = (await _repository.GetPersonsByColorAsync(7)).ToList();
+
+            // Assert
+            Assert.Empty(persons);
+        }
+
+        [Fact]
+        public async Task GetPersonsByColorAsync_ReturnsOrderedById()
+        {
+            // Arrange - Add multiple persons with same color
+            await _repository.AddPersonAsync(new Person { FirstName = "Test1", Color = 5 });
+            await _repository.AddPersonAsync(new Person { FirstName = "Test2", Color = 5 });
+            
+            // Act
+            var persons = (await _repository.GetPersonsByColorAsync(5)).ToList();
+
+            // Assert
+            Assert.Equal(2, persons.Count);
+            Assert.True(persons[0].Id < persons[1].Id);
+        }
     }
 }
