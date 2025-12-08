@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using assecor_assesment_api.Data;
 using assecor_assesment_api.Models;
+using assecor_assesment_api.Exceptions;
 using Microsoft.Extensions.Configuration;
 
 #nullable enable
@@ -193,6 +194,70 @@ namespace assecor_assesment_api.UnitTests
             
             var persons = (await repo.GetPersonsByColorAsync(7)).ToList();
             Assert.Empty(persons);
+        }
+
+        [Fact]
+        public async Task GetAllPersonsAsync_ThrowsCsvFileException_WhenFileNotFound()
+        {
+            // Arrange - create config with non-existent file path
+            var configData = new Dictionary<string, string?>
+            {
+                { "PersonsCsvPath", "C:\\NonExistent\\File.csv" }
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(configData!)
+                .Build();
+            var repo = new CsvPersonRepository(config);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<CsvFileException>(
+                async () => await repo.GetAllPersonsAsync()
+            );
+            
+            Assert.Equal(CsvFileOperation.Access, exception.Operation);
+            Assert.Contains("not found", exception.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public async Task GetPersonByIdAsync_ThrowsCsvFileException_WhenFileNotFound()
+        {
+            // Arrange
+            var configData = new Dictionary<string, string?>
+            {
+                { "PersonsCsvPath", "C:\\NonExistent\\File.csv" }
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(configData!)
+                .Build();
+            var repo = new CsvPersonRepository(config);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<CsvFileException>(
+                async () => await repo.GetPersonByIdAsync(1)
+            );
+            
+            Assert.Equal(CsvFileOperation.Access, exception.Operation);
+        }
+
+        [Fact]
+        public async Task GetPersonsByColorAsync_ThrowsCsvFileException_WhenFileNotFound()
+        {
+            // Arrange
+            var configData = new Dictionary<string, string?>
+            {
+                { "PersonsCsvPath", "C:\\NonExistent\\File.csv" }
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(configData!)
+                .Build();
+            var repo = new CsvPersonRepository(config);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<CsvFileException>(
+                async () => await repo.GetPersonsByColorAsync(1)
+            );
+            
+            Assert.Equal(CsvFileOperation.Access, exception.Operation);
         }
     }
 }
